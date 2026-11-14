@@ -88,6 +88,18 @@ def test_resource_limit_is_enforced(client: TestClient) -> None:
     assert limited.status_code == 429
 
 
+def test_destroyed_resources_release_quota(client: TestClient) -> None:
+    resources = [create_resource(client, name=f"quota-app-{index}").json() for index in range(3)]
+    assert create_resource(client, name="quota-app-over").status_code == 429
+
+    client.post(
+        f"/api/resources/{resources[0]['id']}/destroy",
+        json={"confirm_name": resources[0]["name"]},
+    )
+
+    assert create_resource(client, name="quota-app-replacement").status_code == 201
+
+
 def test_metrics_summary(client: TestClient) -> None:
     first = create_resource(client, name="demo-app-01").json()
     create_resource(client, name="demo-app-02")

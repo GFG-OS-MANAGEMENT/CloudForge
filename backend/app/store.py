@@ -7,7 +7,7 @@ lifecycle state. Persisting this registry is a good follow-up contribution.
 import threading
 from datetime import UTC, datetime
 
-from .models import Resource
+from .models import Resource, ResourceStatus
 
 
 class ResourceLimitReached(RuntimeError):
@@ -22,7 +22,12 @@ class ResourceStore:
 
     def add(self, resource: Resource) -> Resource:
         with self._lock:
-            if len(self._resources) >= self._max_resources:
+            active = sum(
+                1
+                for tracked in self._resources.values()
+                if tracked.status is not ResourceStatus.DESTROYED
+            )
+            if active >= self._max_resources:
                 raise ResourceLimitReached(
                     f"Resource limit reached ({self._max_resources}). "
                     "Destroy unused resources before provisioning more."
