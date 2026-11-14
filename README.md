@@ -46,6 +46,69 @@ Whether you're a beginner exploring cloud computing or a developer managing clou
 
 ---
 
+## 🚦 Quick Start
+
+### Run locally
+
+Requires Python 3.11 or newer.
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate   # Linux/macOS: source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env
+uvicorn backend.app.main:app --reload
+```
+
+Open <http://localhost:8000> for the dashboard and <http://localhost:8000/docs> for the
+interactive API reference.
+
+CloudForge runs in **dry-run mode** by default, so provisioning and destruction are simulated
+until you explicitly set `CLOUDFORGE_DRY_RUN=false`.
+
+### Run with Docker
+
+```bash
+docker compose up --build
+```
+
+### Run the checks
+
+```bash
+pytest
+ruff check .
+```
+
+### API overview
+
+| Method | Endpoint                        | Description                              |
+| ------ | ------------------------------- | ---------------------------------------- |
+| GET    | `/api/health`                   | Service status and safety mode           |
+| GET    | `/api/resources`                | List tracked resources                   |
+| POST   | `/api/resources`                | Provision a resource                     |
+| GET    | `/api/resources/{id}`           | Resource details                         |
+| POST   | `/api/resources/{id}/destroy`   | Destroy a resource after name confirmation |
+| GET    | `/api/metrics/summary`          | Status counts and per-resource uptime    |
+
+Safety defaults:
+
+* Every resource consumes a slot in `CLOUDFORGE_MAX_RESOURCES` to bound accidental spend.
+* Set `CLOUDFORGE_API_KEY` to require an `X-API-Key` header on mutating requests.
+* Destruction requires sending the exact resource name as `confirm_name`.
+
+### Terraform demo module
+
+The included module writes a local JSON manifest instead of creating billable cloud
+resources, so you can try the full workflow without an account:
+
+```bash
+cd infrastructure/terraform/environments/dev
+terraform init
+terraform apply
+```
+
+---
+
 ## 🏗️ Proposed Architecture
 
 CloudForge will follow a modular architecture to keep the platform maintainable and extensible.
@@ -112,31 +175,32 @@ The project will prioritize modularity, simplicity, and technologies that are su
 
 ## 📂 Project Structure
 
-Proposed repository structure:
-
 ```text
 CloudForge/
 │
 ├── backend/
-│   ├── api/
-│   ├── services/
-│   └── main.py
+│   ├── app/
+│   │   ├── api/                  # REST endpoints
+│   │   ├── services/             # Terraform runner, resource lifecycle
+│   │   ├── static/               # Dashboard (HTML/CSS/JS, no build step)
+│   │   ├── config.py             # Environment-based settings
+│   │   ├── models.py             # Request/response schemas
+│   │   ├── store.py              # In-memory resource registry
+│   │   └── main.py               # Application factory
+│   └── tests/
 │
 ├── infrastructure/
-│   ├── terraform/
-│   └── configurations/
+│   └── terraform/
+│       ├── modules/local_demo/   # Safe, offline demo module
+│       └── environments/dev/
 │
-├── monitoring/
-│
-├── tests/
-│
-├── docs/
-│
-├── .github/
-│   └── workflows/
-│
+├── .github/workflows/ci.yml
+├── Dockerfile
+├── docker-compose.yml
+├── pyproject.toml
 ├── requirements.txt
-├── .gitignore
+├── requirements-dev.txt
+├── .env.example
 └── README.md
 ```
 
@@ -149,7 +213,7 @@ CloudForge/
 
 CloudForge will be developed incrementally, with a focus on building a working foundation before expanding functionality.
 
-* [ ] **Phase 1: Project Foundation**
+* [x] **Phase 1: Project Foundation**
 
   * Repository setup
   * Define architecture
@@ -253,6 +317,9 @@ This project is also an opportunity to explore real-world cloud development prac
 <code>🚧 Under Development</code>
 
 CloudForge is in its initial development phase. The architecture, features, and implementation will evolve through continuous development and community contributions.
+
+A working foundation is now in place: a FastAPI backend, a safe local Terraform module, an
+interactive dashboard, automated tests, and CI. Real AWS provisioning is the next milestone.
 
 ---
 

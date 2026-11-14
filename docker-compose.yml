@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      CLOUDFORGE_DRY_RUN: "${CLOUDFORGE_DRY_RUN:-true}"
+      CLOUDFORGE_MAX_RESOURCES: "${CLOUDFORGE_MAX_RESOURCES:-10}"
+      CLOUDFORGE_API_KEY: "${CLOUDFORGE_API_KEY:-}"
+    volumes:
+      - cloudforge-workdirs:/app/backend/.cloudforge
+    restart: unless-stopped
+
+volumes:
+  cloudforge-workdirs:

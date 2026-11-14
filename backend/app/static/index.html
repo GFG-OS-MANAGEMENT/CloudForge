@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CloudForge Dashboard</title>
+    <style>
+      :root {
+        --bg: #0a0f1e;
+        --bg-soft: #101a30;
+        --panel: #121c33;
+        --panel-2: #16223d;
+        --border: #24324f;
+        --text: #e7eefb;
+        --muted: #8fa1bd;
+        --accent: #4cc9f0;
+        --green: #3ddc97;
+        --amber: #ffb703;
+        --red: #ff6b6b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background:
+          radial-gradient(900px 500px at 85% -10%, rgba(76, 201, 240, 0.12), transparent),
+          radial-gradient(700px 400px at 0% 110%, rgba(61, 220, 151, 0.08), transparent),
+          var(--bg);
+        color: var(--text);
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 32px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(10, 15, 30, 0.88);
+        backdrop-filter: blur(10px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), #4361ee);
+        color: #06111f;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.2rem;
+        letter-spacing: 0.4px;
+      }
+
+      .brand p {
+        margin: 2px 0 0;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .header-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .pill {
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .pill.ok {
+        color: var(--green);
+        border-color: rgba(61, 220, 151, 0.4);
+        background: rgba(61, 220, 151, 0.1);
+      }
+
+      .pill.warn {
+        color: var(--amber);
+        border-color: rgba(255, 183, 3, 0.4);
+        background: rgba(255, 183, 3, 0.1);
+      }
+
+      .pill.bad {
+        color: var(--red);
+        border-color: rgba(255, 107, 107, 0.4);
+        background: rgba(255, 107, 107, 0.1);
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 32px 56px;
+      }
+
+      .notice {
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        border: 1px solid rgba(255, 183, 3, 0.35);
+        border-left: 4px solid var(--amber);
+        border-radius: 10px;
+        background: rgba(255, 183, 3, 0.07);
+        color: #ffd166;
+        font-size: 0.9rem;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .stat {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+      }
+
+      .stat span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 1.7rem;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat.running strong {
+        color: var(--green);
+      }
+
+      .stat.failed strong {
+        color: var(--red);
+      }
+
+      .stat.destroyed strong {
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .panel {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--panel);
+      }
+
+      .panel h2 {
+        margin: 0 0 16px;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .panel-head h2 {
+        margin: 0;
+      }
+
+      form label {
+        display: block;
+        margin-bottom: 12px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      input {
+        width: 100%;
+        margin-top: 6px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: #0b1426;
+        color: var(--text);
+        font-size: 0.9rem;
+        text-transform: none;
+        letter-spacing: normal;
+      }
+
+      input:focus {
+        outline: 2px solid rgba(76, 201, 240, 0.45);
+        outline-offset: 1px;
+      }
+
+      button {
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), #4361ee);
+        color: #05101f;
+        font-weight: 700;
+        font-size: 0.86rem;
+        cursor: pointer;
+      }
+
+      button:hover {
+        filter: brightness(1.08);
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      button.secondary {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      button.danger {
+        background: rgba(255, 107, 107, 0.12);
+        border: 1px solid rgba(255, 107, 107, 0.45);
+        color: var(--red);
+        padding: 6px 12px;
+        font-size: 0.78rem;
+      }
+
+      .hint {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 0.76rem;
+        line-height: 1.5;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.87rem;
+      }
+
+      th {
+        padding: 10px 12px;
+        text-align: left;
+        color: var(--muted);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 13px 12px;
+        border-bottom: 1px solid rgba(36, 50, 79, 0.6);
+        vertical-align: top;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .resource-id {
+        margin-top: 3px;
+        color: var(--muted);
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.72rem;
+      }
+
+      .resource-message {
+        margin-top: 5px;
+        max-width: 320px;
+        color: var(--muted);
+        font-size: 0.74rem;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: capitalize;
+      }
+
+      .badge.ok {
+        color: var(--green);
+        background: rgba(61, 220, 151, 0.12);
+      }
+
+      .badge.warn {
+        color: var(--amber);
+        background: rgba(255, 183, 3, 0.12);
+      }
+
+      .badge.bad {
+        color: var(--red);
+        background: rgba(255, 107, 107, 0.12);
+      }
+
+      .badge.muted {
+        color: var(--muted);
+        background: rgba(143, 161, 189, 0.12);
+      }
+
+      .empty {
+        padding: 26px 12px;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 10;
+        max-width: 380px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel-2);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+        font-size: 0.86rem;
+      }
+
+      .toast.bad {
+        border-color: rgba(255, 107, 107, 0.5);
+        color: #ffb4b4;
+      }
+
+      .toast.ok {
+        border-color: rgba(61, 220, 151, 0.5);
+        color: #a7f3d0;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        header,
+        main {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <div class="mark">CF</div>
+        <div>
+          <h1>CloudForge</h1>
+          <p>Cloud infrastructure, simplified</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="mode-badge" class="pill">Connecting</span>
+        <input
+          id="api-key"
+          type="password"
+          placeholder="API key (if enabled)"
+          autocomplete="off"
+          hidden
+        />
+        <button id="save-key" class="secondary">Save key</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="dry-run-notice" class="notice" hidden>
+        Dry-run mode is active. Provisioning and destruction are simulated, so no real cloud
+        resources are created or deleted.
+      </div>
+
+      <section class="stats" aria-label="Resource metrics">
+        <article class="stat"><span>Total</span><strong id="stat-total">0</strong></article>
+        <article class="stat running">
+          <span>Running</span><strong id="stat-running">0</strong>
+        </article>
+        <article class="stat failed">
+          <span>Failed</span><strong id="stat-failed">0</strong>
+        </article>
+        <article class="stat destroyed">
+          <span>Destroyed</span><strong id="stat-destroyed">0</strong>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Provision a resource</h2>
+          <form id="create-form">
+            <label>
+              Name
+              <input
+                name="name"
+                required
+                pattern="[a-z][a-z0-9-]{2,39}"
+                placeholder="demo-web-01"
+                autocomplete="off"
+              />
+            </label>
+            <label>
+              Region
+              <input name="region" value="local" required pattern="[a-z0-9-]{2,32}" />
+            </label>
+            <label>
+              Tags
+              <input name="tags" placeholder="env=dev,team=cloud" autocomplete="off" />
+            </label>
+            <button type="submit">Provision</button>
+            <p class="hint">
+              Name must be 3-40 characters: lowercase letters, digits or hyphens. Dry-run is on
+              by default.
+            </p>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Resources</h2>
+            <button id="refresh" class="secondary">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Region</th>
+                  <th>Uptime</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="resource-rows">
+                <tr>
+                  <td colspan="5" class="empty">No resources yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <script>
+      const KEY_STORAGE = "cloudforge-api-key";
+      const state = { resources: [], metrics: null };
+      const elements = {
+        modeBadge: document.getElementById("mode-badge"),
+        dryRunNotice: document.getElementById("dry-run-notice"),
+        apiKey: document.getElementById("api-key"),
+        saveKey: document.getElementById("save-key"),
+        form: document.getElementById("create-form"),
+        rows: document.getElementById("resource-rows"),
+        refresh: document.getElementById("refresh"),
+        toast: document.getElementById("toast"),
+        stats: {
+          total: document.getElementById("stat-total"),
+          running: document.getElementById("stat-running"),
+          failed: document.getElementById("stat-failed"),
+          destroyed: document.getElementById("stat-destroyed"),
+        },
+      };
+
+      elements.apiKey.value = sessionStorage.getItem(KEY_STORAGE) || "";
+
+      function authHeaders() {
+        const key = sessionStorage.getItem(KEY_STORAGE);
+        return key ? { "X-API-Key": key } : {};
+      }
+
+      async function request(path, options = {}) {
+        const response = await fetch(`/api${path}`, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders(),
+            ...(options.headers || {}),
+          },
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+          let message = data && data.detail !== undefined ? data.detail : response.statusText;
+          if (message && typeof message === "object") {
+            message = message.message || JSON.stringify(message);
+          }
+          const error = new Error(message || `Request failed (${response.status})`);
+          error.status = response.status;
+          throw error;
+        }
+        return data;
+      }
+
+      let toastTimer;
+      function toast(message, kind = "") {
+        const node = elements.toast;
+        node.textContent = message;
+        node.className = `toast ${kind}`.trim();
+        node.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          node.hidden = true;
+        }, 4500);
+      }
+
+      function formatUptime(seconds) {
+        if (seconds === undefined || seconds === null) return "—";
+        const total = Math.max(0, Math.floor(seconds));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        if (hours) return `${hours}h ${minutes}m`;
+        if (minutes) return `${minutes}m ${total % 60}s`;
+        return `${total}s`;
+      }
+
+      function badgeKind(status) {
+        return (
+          {
+            running: "ok",
+            failed: "bad",
+            provisioning: "warn",
+            destroying: "warn",
+            pending: "warn",
+            destroyed: "muted",
+          }[status] || "muted"
+        );
+      }
+
+      function renderStats() {
+        const metrics = state.metrics;
+        const statuses = (metrics && metrics.by_status) || {};
+        elements.stats.total.textContent = metrics ? metrics.total : 0;
+        elements.stats.running.textContent = metrics ? metrics.running : 0;
+        elements.stats.failed.textContent = statuses.failed || 0;
+        elements.stats.destroyed.textContent = statuses.destroyed || 0;
+      }
+
+      function renderRows() {
+        const tbody = elements.rows;
+        tbody.replaceChildren();
+
+        if (state.resources.length === 0) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 5;
+          cell.className = "empty";
+          cell.textContent = "No resources yet.";
+          row.append(cell);
+          tbody.append(row);
+          return;
+        }
+
+        for (const resource of state.resources) {
+          const row = document.createElement("tr");
+
+          const nameCell = document.createElement("td");
+          const name = document.createElement("div");
+          name.textContent = resource.name;
+          const id = document.createElement("div");
+          id.className = "resource-id";
+          id.textContent = resource.id;
+          nameCell.append(name, id);
+
+          const statusCell = document.createElement("td");
+          const badge = document.createElement("span");
+          badge.className = `badge ${badgeKind(resource.status)}`;
+          badge.textContent = resource.status;
+          statusCell.append(badge);
+          if (resource.message) {
+            const message = document.createElement("div");
+            message.className = "resource-message";
+            message.textContent = resource.message;
+            statusCell.append(message);
+          }
+
+          const regionCell = document.createElement("td");
+          regionCell.textContent = resource.region;
+
+          const uptimeCell = document.createElement("td");
+          const uptime =
+            state.metrics && state.metrics.uptime_seconds
+              ? state.metrics.uptime_seconds[resource.id]
+              : undefined;
+          uptimeCell.textContent = formatUptime(uptime);
+
+          const actionCell = document.createElement("td");
+          if (resource.status !== "destroyed" && resource.status !== "destroying") {
+            const button = document.createElement("button");
+            button.className = "danger";
+            button.type = "button";
+            button.textContent = "Destroy";
+            button.addEventListener("click", () => destroyResource(resource));
+            actionCell.append(button);
+          }
+
+          row.append(nameCell, statusCell, regionCell, uptimeCell, actionCell);
+          tbody.append(row);
+        }
+      }
+
+      async function refresh() {
+        if (document.hidden) return;
+        try {
+          const [health, resources, metrics] = await Promise.all([
+            request("/health"),
+            request("/resources"),
+            request("/metrics/summary"),
+          ]);
+
+          elements.modeBadge.textContent = health.dry_run ? "Dry-run" : "Live";
+          elements.modeBadge.className = `pill ${health.dry_run ? "warn" : "ok"}`;
+          elements.dryRunNotice.hidden = !health.dry_run;
+          elements.apiKey.hidden = !health.auth_enabled;
+
+          state.resources = resources;
+          state.metrics = metrics;
+          renderStats();
+          renderRows();
+        } catch (error) {
+          elements.modeBadge.textContent = "Offline";
+          elements.modeBadge.className = "pill bad";
+          toast(error.message, "bad");
+        }
+      }
+
+      async function destroyResource(resource) {
+        if (resource.status === "provisioning" || resource.status === "pending") {
+          toast("Wait for provisioning to finish before destroying this resource.", "bad");
+          return;
+        }
+        const typed = prompt(
+          `Type the resource name "${resource.name}" to confirm destruction:`
+        );
+        if (typed === null) return;
+        try {
+          await request(`/resources/${encodeURIComponent(resource.id)}/destroy`, {
+            method: "POST",
+            body: JSON.stringify({ confirm_name: typed }),
+          });
+          toast(`Destroyed ${resource.name}.`, "ok");
+          await refresh();
+        } catch (error) {
+          toast(error.message, "bad");
+        }
+      }
+
+      function parseTags(raw) {
+        const tags = {};
+        for (const pair of raw.split(",")) {
+          const trimmed = pair.trim();
+          if (!trimmed) continue;
+          const separator = trimmed.indexOf("=");
+          if (separator <= 0) continue;
+          tags[trimmed.slice(0, separator).trim()] = trimmed.slice(separator + 1).trim();
+        }
+        return tags;
+      }
+
+      elements.form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const submit = form.querySelector("button[type=submit]");
+        const data = new FormData(form);
+        const payload = {
+          name: String(data.get("name") || "").trim(),
+          region: String(data.get("region") || "").trim() || "local",
+          tags: parseTags(String(data.get("tags") || "")),
+        };
+
+        submit.disabled = true;
+        submit.textContent = "Provisioning...";
+        try {
+          await request("/resources", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          toast(`Provisioned ${payload.name}.`, "ok");
+          form.reset();
+          await refresh();
+        } catch (error) {
+          toast(error.message, "bad");
+        } finally {
+          submit.disabled = false;
+          submit.textContent = "Provision";
+        }
+      });
+
+      elements.saveKey.addEventListener("click", () => {
+        const key = elements.apiKey.value.trim();
+        if (key) {
+          sessionStorage.setItem(KEY_STORAGE, key);
+        } else {
+          sessionStorage.removeItem(KEY_STORAGE);
+        }
+        toast(key ? "API key saved for this tab." : "API key cleared.", "ok");
+      });
+
+      elements.refresh.addEventListener("click", refresh);
+
+      refresh();
+      setInterval(refresh, 5000);
+    </script>
+  </body>
+</html>
