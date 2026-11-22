@@ -1,0 +1,6 @@
+name   = "dev-demo-01"
+region = "local"
+tags = {
+  environment = "dev"
+  managed_by  = "cloudforge"
+}
